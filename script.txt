@@ -1,0 +1,50 @@
+// ==UserScript==
+// @name         Disable MathJax
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Prevent MathJax from formatting math expressions
+// @author       You
+// @match        https://example.com/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    console.log('Tampermonkey script is running: Disabling MathJax.');
+
+
+    function disableMathJax() {
+        console.log('Disabling MathJax...');
+        if (window.MathJax) {
+            delete window.MathJax; // Remove MathJax object if it exists
+        }
+
+
+        const scriptObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.tagName === 'SCRIPT' && node.src && node.src.includes('MathJax')) {
+                        console.log('Blocking MathJax script:', node.src);
+                        node.parentNode.removeChild(node); // Remove MathJax script
+                    }
+                });
+            });
+        });
+
+
+        scriptObserver.observe(document.head, { childList: true, subtree: true });
+
+
+        const scripts = document.querySelectorAll('script');
+        scripts.forEach((script) => {
+            if (script.src && script.src.includes('MathJax')) {
+                console.log('Blocking existing MathJax script:', script.src);
+                script.parentNode.removeChild(script);
+            }
+        });
+    }
+
+    // Run the disabling function as soon as possible pronto
+    disableMathJax();
+})();
